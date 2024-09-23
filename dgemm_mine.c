@@ -62,13 +62,13 @@ void do_block(const int M, const int block_size, double* A_block, double* B_bloc
 
     for (int k = k_start; k < k_start + block_size && k < M; ++k) {
         for (int i = i_start; i < i_start + block_size && i < M; ++i) {
-            A_block[k * block_size + i] = A[k * M + i];
+            A_block[(k - k_start) * block_size + (i - i_start)] = A[k * M + i];
         }
     }
 
     for (int j = j_start; j < j_start + block_size && j < M; ++j) {
         for (int k = k_start; k < k_start + block_size && k < M; ++k) {
-            B_block[j * block_size + k] = B[j * M + k];
+            B_block[(j - j_start) * block_size + (k - k_start)] = B[j * M + k];
         }
     }
 
@@ -76,29 +76,29 @@ void do_block(const int M, const int block_size, double* A_block, double* B_bloc
         for (int i = i_start; i < i_start + block_size && i < M; ++i) {
             double cij = C[j * M + i];
             for (int k = k_start; k < k_start + block_size && k < M; ++k) {
-                cij += A_block[k * block_size + i] * B_block[j * block_size + k];
+                cij += A_block[(k - k_start) * block_size + (i - i_start)] * B_block[(j - j_start) * block_size + (k - k_start)];
             }
             C[j * M + i] = cij;
         }
     }
 
-    printf("done");
+    // printf("done");
 }
 
 void square_dgemm(const int M, const double* A, const double* B, double* C)
 {
-    double* A_block = (double*)aligned_alloc(sizeof(double), BLOCK_SIZE * BLOCK_SIZE * sizeof(double));
-    double* B_block = (double*)aligned_alloc(sizeof(double), BLOCK_SIZE * BLOCK_SIZE * sizeof(double));
+    double* A_block = (double*)aligned_alloc(BLOCK_SIZE * sizeof(double), BLOCK_SIZE * BLOCK_SIZE * sizeof(double));
+    double* B_block = (double*)aligned_alloc(BLOCK_SIZE * sizeof(double), BLOCK_SIZE * BLOCK_SIZE * sizeof(double));
 
     for (int i = 0; i < M; i += BLOCK_SIZE) {
         for (int j = 0; j < M; j += BLOCK_SIZE) {
             for (int k = 0; k < M; k += BLOCK_SIZE) {
-                printf("i");
-                printf("%d\n", M - i);
-                printf("j");
-                printf("%d\n", M - j);
-                printf("k");
-                printf("%d\n", M - k);
+                // printf("i");
+                // printf("%d\n", M - i);
+                // printf("j");
+                // printf("%d\n", M - j);
+                // printf("k");
+                // printf("%d\n", M - k);
                 do_block(M, BLOCK_SIZE, A_block, B_block, A, B, C, i, j, k);
             }
         }
