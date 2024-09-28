@@ -30,7 +30,7 @@ void do_block(const int M, const int block_size, double* A_block, double* B_bloc
     for (int j = j_start; j < j_start + block_size && j < M; ++j) {
         for (int k = k_start; k < k_start + block_size && k < M; ++k) {
             int i = i_start;
-            for (; i < i_start + block_size - 4 && i < M; i += 4) {
+            for (; i < i_start + block_size - 4 && i < M - 4; i += 4) {
                 __m256d c_vec = _mm256_loadu_pd(&C[j * M + i]);
 
                 __m256d a_vec = _mm256_loadu_pd(&A_block[(k - k_start) * block_size + (i - i_start)]);
@@ -40,10 +40,10 @@ void do_block(const int M, const int block_size, double* A_block, double* B_bloc
                 _mm256_storeu_pd(&C[j * M + i], c_vec);
             }
 
-            // Handle the remaining elements (when i % 4 != 0)
+            // // Handle the remaining elements (when i % 4 != 0)
             for (; i < i_start + block_size && i < M; ++i) {
                 double cij = C[j * M + i];
-                cij += A_block[(k - k_start) * block_size + (i - i_start)] * B[(j - j_start) * block_size + (k - k_start)];
+                cij += A_block[(k - k_start) * block_size + (i - i_start)] * B_block[(j - j_start) * block_size + (k - k_start)];
                 C[j * M + i] = cij;
             }
         }
@@ -55,9 +55,9 @@ void square_dgemm(const int M, const double* A, const double* B, double* C)
     double* A_block = (double*)aligned_alloc(BLOCK_SIZE * sizeof(double), BLOCK_SIZE * BLOCK_SIZE * sizeof(double));
     double* B_block = (double*)aligned_alloc(BLOCK_SIZE * sizeof(double), BLOCK_SIZE * BLOCK_SIZE * sizeof(double));
 
-    for (int i = 0; i < M; i += BLOCK_SIZE) {
-        for (int j = 0; j < M; j += BLOCK_SIZE) {
-            for (int k = 0; k < M; k += BLOCK_SIZE) {
+    for (int j = 0; j < M; j += BLOCK_SIZE) {
+        for (int k = 0; k < M; k += BLOCK_SIZE) {
+            for (int i = 0; i < M; i += BLOCK_SIZE) {
                 do_block(M, BLOCK_SIZE, A_block, B_block, A, B, C, i, j, k);
             }
         }
