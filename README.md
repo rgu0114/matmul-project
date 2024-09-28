@@ -1,5 +1,6 @@
 # Matrix multiply reference code
 
+
 Matrix muliplication is a good first example of code optimization
 for three reasons:
 
