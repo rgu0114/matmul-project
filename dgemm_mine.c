@@ -80,8 +80,6 @@ void do_block(const int M, const int block_size, double *A_block, double *B_bloc
             C[j * M + i] = cij;
         }
     }
-
-    printf("done");
 }
 
 void square_dgemm(const int M, const double *A, const double *B, double *C) {
@@ -91,12 +89,6 @@ void square_dgemm(const int M, const double *A, const double *B, double *C) {
     for (int i = 0; i < M; i += BLOCK_SIZE) {
         for (int j = 0; j < M; j += BLOCK_SIZE) {
             for (int k = 0; k < M; k += BLOCK_SIZE) {
-                printf("i");
-                printf("%d\n", M - i);
-                printf("j");
-                printf("%d\n", M - j);
-                printf("k");
-                printf("%d\n", M - k);
                 do_block(M, BLOCK_SIZE, A_block, B_block, A, B, C, i, j, k);
             }
         }
@@ -111,20 +103,18 @@ void square_dgemm(const int M, const double *A, const double *B, double *C) {
 // void do_block(const int M, const int block_size, const double *A, const double *B, double *C,
 //               const int i_start, const int j_start, const int k_start) {    
 //     for (int j = j_start; j < j_start + block_size && j < M; ++j) {
-//         for (int i = i_start; i < i_start + block_size && i < M; ++i) {
-//             double cij = C[j * M + i];
-//             for (int k = k_start; k < k_start + block_size && k < M; ++k) {
-//                 cij += A[k * M + i] * B[j * M + k];
+//         for (int k = i_start; k < i_start + block_size && k < M; ++k) {
+//             for (int i = k_start; i < k_start + block_size && i < M; ++i) {
+//                 C[j * M + i] += A[k * M + i] * B[j * M + k];
 //             }
-//             C[j * M + i] = cij;
 //         }
 //     }
 // }
 
 // void square_dgemm(const int M, const double *A, const double *B, double *C) {
-//     for (int i = 0; i < M; i += BLOCK_SIZE) {
-//         for (int j = 0; j < M; j += BLOCK_SIZE) {
-//             for (int k = 0; k < M; k += BLOCK_SIZE) {
+//     for (int j = 0; j < M; j += BLOCK_SIZE) {
+//         for (int k = 0; k < M; k += BLOCK_SIZE) {
+//             for (int i = 0; i < M; i += BLOCK_SIZE) {
 //                 do_block(M, BLOCK_SIZE, A, B, C, i, j, k);
 //             }
 //         }
