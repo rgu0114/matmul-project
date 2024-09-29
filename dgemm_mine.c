@@ -32,7 +32,6 @@ void do_block(const int M, const int block_size, double* A_block, double* B_bloc
             int i = i_start;
             for (; i < i_start + block_size - 8 && i < M - 8; i += 8) {
                 double* aligned_C_ptr = &C[j * M + i];
-                // assert(((uintptr_t)(aligned_C_ptr) % 64) == 0);
                 __m512d c_vec = _mm512_load_pd(aligned_C_ptr);
 
                 __m512d a_vec = _mm512_load_pd(&A_block[(k - k_start) * block_size + (i - i_start)]);
@@ -52,33 +51,23 @@ void do_block(const int M, const int block_size, double* A_block, double* B_bloc
 
 void square_dgemm(const int M, const double* A, const double* B, double* C)
 {
-    #pragma omp parallel
-    {
-        double* A_block = (double*)aligned_alloc(64, BLOCK_SIZE * BLOCK_SIZE * sizeof(double));
-        double* B_block = (double*)aligned_alloc(64, BLOCK_SIZE * BLOCK_SIZE * sizeof(double));
-        // double* aligned_C = (double*)aligned_alloc(64, M * M * sizeof(double));
+    double* A_block = (double*)aligned_alloc(64, BLOCK_SIZE * BLOCK_SIZE * sizeof(double));
+    double* B_block = (double*)aligned_alloc(64, BLOCK_SIZE * BLOCK_SIZE * sizeof(double));
 
-        // assert(((uintptr_t) aligned_C % 64) == 0);
-        assert(((uintptr_t) A_block % 64) == 0);
-        assert(((uintptr_t) B_block % 64) == 0);
+    assert(((uintptr_t) A_block % 64) == 0);
+    assert(((uintptr_t) B_block % 64) == 0);
 
-        // memcpy(aligned_C, C, M * M * sizeof(double));
-
-        #pragma omp for collapse(3)
-        for (int j = 0; j < M; j += BLOCK_SIZE) {
-            for (int k = 0; k < M; k += BLOCK_SIZE) {
-                for (int i = 0; i < M; i += BLOCK_SIZE) {
-                    do_block(M, BLOCK_SIZE, A_block, B_block, A, B, C, i, j, k);
-                }
+    #pragma omp parallel for collapse(3) private (A_block, B_block)
+    for (int j = 0; j < M; j += BLOCK_SIZE) {
+        for (int k = 0; k < M; k += BLOCK_SIZE) {
+            for (int i = 0; i < M; i += BLOCK_SIZE) {
+                do_block(M, BLOCK_SIZE, A_block, B_block, A, B, C, i, j, k);
             }
         }
-
-        // memcpy(C, aligned_C, M * M * sizeof(double));
-
-        free(A_block);
-        free(B_block);
-        // free(aligned_C);
     }
+
+    free(A_block);
+    free(B_block);
 }
 
 /* V5: SIMD */
