@@ -10,7 +10,7 @@ PLATFORM=gcc
 include Makefile.in.$(PLATFORM)
 DRIVERS=$(addprefix matmul-,$(BUILDS))
 TIMINGS=$(addsuffix .csv,$(addprefix timing-,$(BUILDS)))
-MINE_CFLAGS = -Ofast -march=native -funroll-loops -ftree-vectorize -flto -fstrict-aliasing -ffast-math
+MINE_CFLAGS = -Ofast -march=native -funroll-loops -ftree-vectorize -flto -fstrict-aliasing -ffast-math -fno-math-errno -fassociative-math -fprefetch-loop-arrays -floop-block -floop-parallelize-all -ftree-loop-distribution -fipa-pta -ffunction-sections -fdata-sections -mtune=native
 
 .PHONY:	all
 all:	$(DRIVERS)
